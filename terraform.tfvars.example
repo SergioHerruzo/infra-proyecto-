@@ -1,0 +1,6 @@
+aws_region                = "us-east-1"
+domain_name               = "example.com"
+lab_role_name             = "LabRole"
+lab_instance_profile_name = "LabInstanceProfile"
+cloudflare_api_token      = "YOUR_CLOUDFLARE_API_TOKEN"
+cloudflare_zone_id        = "YOUR_CLOUDFLARE_ZONE_ID"
