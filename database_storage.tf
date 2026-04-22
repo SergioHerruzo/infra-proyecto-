@@ -1,6 +1,12 @@
+resource "random_string" "suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
 # S3 Bucket for games and files
 resource "aws_s3_bucket" "game_storage" {
-  bucket = "steamindio-storage-${data.aws_caller_identity.current.account_id}"
+  bucket = "steamindio-storage-${data.aws_caller_identity.current.account_id}-${random_string.suffix.result}"
 }
 
 resource "aws_s3_bucket_public_access_block" "game_storage" {
@@ -32,7 +38,7 @@ resource "aws_db_instance" "postgres" {
 }
 
 resource "aws_security_group" "db_sg" {
-  name        = "steam-rds-sg"
+  name        = "steam-rds-sg-${random_string.suffix.result}"
   description = "Allow incoming traffic to RDS"
 
   ingress {

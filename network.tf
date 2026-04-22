@@ -15,16 +15,16 @@ resource "aws_acm_certificate" "cert" {
 
 resource "cloudflare_record" "cert_validation" {
   for_each = {
-    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
-      name  = dvo.resource_record_name
-      value = dvo.resource_record_value
-      type  = dvo.resource_record_type
+    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.resource_record_name => {
+      name    = dvo.resource_record_name
+      content = dvo.resource_record_value
+      type    = dvo.resource_record_type
     }
   }
 
   zone_id = var.cloudflare_zone_id
-  name    = each.value.name
-  value   = each.value.value
+  name    = replace(each.value.name, "/\\.$/", "")
+  content = replace(each.value.content, "/\\.$/", "")
   type    = each.value.type
   ttl     = 60
   proxied = false

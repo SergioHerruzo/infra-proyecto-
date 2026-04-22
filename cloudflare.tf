@@ -6,7 +6,7 @@ resource "cloudflare_record" "aws_ns" {
   zone_id = var.cloudflare_zone_id
   name    = "@"
   type    = "NS"
-  value   = aws_route53_zone.main.name_servers[count.index]
+  content = aws_route53_zone.main.name_servers[count.index]
   ttl     = 1
 }
 

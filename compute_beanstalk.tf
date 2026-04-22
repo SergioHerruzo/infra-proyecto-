@@ -1,10 +1,10 @@
 resource "aws_elastic_beanstalk_application" "steam_workers" {
-  name        = "steam-workers"
+  name        = "steam-workers-${random_string.suffix.result}"
   description = "Elastic Beanstalk Application for game workers"
 }
 
 resource "aws_elastic_beanstalk_environment" "prod" {
-  name                = "steam-workers-prod"
+  name                = "steam-workers-prod-${random_string.suffix.result}"
   application         = aws_elastic_beanstalk_application.steam_workers.name
   solution_stack_name = "64bit Amazon Linux 2023 v4.4.1 running Docker"
 

@@ -2,12 +2,16 @@ resource "aws_amplify_app" "app_one" {
   name       = "steam-frontend-one"
   repository = "https://github.com/example/repo-one" # Placeholder
   
-  # Often blocked in Academy, check permissions
+  # GitHub authentication
+  access_token = var.github_access_token
 }
 
 resource "aws_amplify_app" "app_two" {
   name       = "steam-frontend-two"
   repository = "https://github.com/example/repo-two" # Placeholder
+  
+  # GitHub authentication
+  access_token = var.github_access_token
 }
 
 resource "aws_amplify_domain_association" "app_one" {

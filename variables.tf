@@ -25,3 +25,8 @@ variable "cloudflare_api_token" {
 variable "cloudflare_zone_id" {
   description = "Cloudflare Zone ID for the domain"
 }
+
+variable "github_access_token" {
+  description = "GitHub Personal Access Token for Amplify"
+  sensitive   = true
+}
