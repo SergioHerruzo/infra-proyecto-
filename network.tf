@@ -22,12 +22,13 @@ resource "cloudflare_record" "cert_validation" {
     }
   }
 
-  zone_id = var.cloudflare_zone_id
-  name    = replace(each.value.name, "/\\.$/", "")
-  content = replace(each.value.content, "/\\.$/", "")
-  type    = each.value.type
-  ttl     = 60
-  proxied = false
+  zone_id         = var.cloudflare_zone_id
+  name            = replace(each.value.name, "/\\.$/", "")
+  content         = replace(each.value.content, "/\\.$/", "")
+  type            = each.value.type
+  ttl             = 60
+  proxied         = false
+  allow_overwrite = true  # handles records left from a previous partial apply
 }
 
 # In Academy, DNS validation sometimes hangs or is blocked. 

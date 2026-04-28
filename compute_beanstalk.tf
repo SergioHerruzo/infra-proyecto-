@@ -1,3 +1,9 @@
+# Dynamically find the latest available Docker solution stack in this region
+data "aws_elastic_beanstalk_solution_stack" "docker" {
+  most_recent = true
+  name_regex  = "^64bit Amazon Linux 2023 .* running Docker$"
+}
+
 resource "aws_elastic_beanstalk_application" "steam_workers" {
   name        = "steam-workers-${random_string.suffix.result}"
   description = "Elastic Beanstalk Application for game workers"
@@ -6,7 +12,7 @@ resource "aws_elastic_beanstalk_application" "steam_workers" {
 resource "aws_elastic_beanstalk_environment" "prod" {
   name                = "steam-workers-prod-${random_string.suffix.result}"
   application         = aws_elastic_beanstalk_application.steam_workers.name
-  solution_stack_name = "64bit Amazon Linux 2023 v4.4.1 running Docker"
+  solution_stack_name = data.aws_elastic_beanstalk_solution_stack.docker.name
 
   # AWS Academy: Use Single Instance to save credits, but can be changed to LoadBalanced
   setting {
