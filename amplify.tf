@@ -4,8 +4,9 @@ resource "aws_amplify_app" "app" {
   access_token = var.github_access_token
   platform     = "WEB"
 
-  # Disable automatic webhook/branch management to avoid GitHub 404
-  # (requires admin:repo_hook scope which Academy tokens usually lack)
+  # IMPORTANT: Your GitHub PAT must have 'repo' and 'admin:repo_hook' scopes.
+  # The 'Not Found' (404) error on list-repository-webhooks usually means 
+  # these permissions are missing.
   enable_auto_branch_creation = false
   enable_branch_auto_build    = false
 }

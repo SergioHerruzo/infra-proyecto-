@@ -13,27 +13,27 @@ resource "aws_acm_certificate" "cert" {
   }
 }
 
-resource "cloudflare_record" "cert_validation" {
+resource "aws_route53_record" "cert_validation" {
   for_each = {
     for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
-      name    = dvo.resource_record_name
-      content = dvo.resource_record_value
-      type    = dvo.resource_record_type
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
     }
   }
 
-  zone_id         = var.cloudflare_zone_id
-  name            = replace(each.value.name, "/\\.$/", "")
-  content         = replace(each.value.content, "/\\.$/", "")
-  type            = each.value.type
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
   ttl             = 60
-  proxied         = false
-  allow_overwrite = true  # handles records left from a previous partial apply
+  type            = each.value.type
+  zone_id         = aws_route53_zone.main.zone_id
 }
 
 # In Academy, DNS validation sometimes hangs or is blocked. 
 # We define the resource but warning the user that manual check might be needed.
 resource "aws_acm_certificate_validation" "cert" {
   certificate_arn         = aws_acm_certificate.cert.arn
-  validation_record_fqdns = [for record in cloudflare_record.cert_validation : record.hostname]
+  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
 }
+
