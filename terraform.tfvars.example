@@ -2,5 +2,9 @@ aws_region                = "us-east-1"
 domain_name               = "example.com"
 lab_role_name             = "LabRole"
 lab_instance_profile_name = "LabInstanceProfile"
-cloudflare_api_token      = "YOUR_CLOUDFLARE_API_TOKEN"
-cloudflare_zone_id        = "YOUR_CLOUDFLARE_ZONE_ID"
+
+# --- Valores que Terraform pedirá si no se definen aquí ---
+# cloudflare_api_token  = "YOUR_CLOUDFLARE_API_TOKEN"
+# cloudflare_zone_id    = "YOUR_CLOUDFLARE_ZONE_ID"
+# github_access_token   = "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"
+# github_repo           = "https://github.com/tu-usuario/tu-repo"

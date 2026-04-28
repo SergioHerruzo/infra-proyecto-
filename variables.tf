@@ -18,15 +18,19 @@ variable "lab_instance_profile_name" {
 }
 
 variable "cloudflare_api_token" {
-  description = "Cloudflare API Token"
+  description = "Cloudflare API Token (se pedirá al desplegar)"
   sensitive   = true
 }
 
 variable "cloudflare_zone_id" {
-  description = "Cloudflare Zone ID for the domain"
+  description = "Cloudflare Zone ID del dominio (se pedirá al desplegar)"
 }
 
 variable "github_access_token" {
-  description = "GitHub Personal Access Token for Amplify"
+  description = "GitHub Personal Access Token para Amplify (se pedirá al desplegar)"
   sensitive   = true
+}
+
+variable "github_repo" {
+  description = "URL del repositorio de GitHub para la app Amplify (ej: https://github.com/usuario/mi-repo)"
 }
