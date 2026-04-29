@@ -17,14 +17,6 @@ variable "lab_instance_profile_name" {
   default     = "LabInstanceProfile"
 }
 
-variable "cloudflare_api_token" {
-  description = "Cloudflare API Token (se pedirá al desplegar)"
-  sensitive   = true
-}
-
-variable "cloudflare_zone_id" {
-  description = "Cloudflare Zone ID del dominio (se pedirá al desplegar)"
-}
 
 variable "github_access_token" {
   description = "GitHub Personal Access Token para Amplify (se pedirá al desplegar)"
