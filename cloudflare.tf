@@ -4,7 +4,7 @@
 resource "cloudflare_record" "aws_ns" {
   count   = 4
   zone_id = var.cloudflare_zone_id
-  name    = "@"
+  name    = var.domain_name
   type    = "NS"
   content = aws_route53_zone.main.name_servers[count.index]
   ttl     = 1
