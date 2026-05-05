@@ -3,10 +3,6 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "domain_name" {
-  description = "The domain name managed by Route 53 and Cloudflare"
-}
-
 variable "lab_role_name" {
   description = "The name of the pre-created LabRole"
   default     = "LabRole"
@@ -15,14 +11,4 @@ variable "lab_role_name" {
 variable "lab_instance_profile_name" {
   description = "The name of the pre-created LabInstanceProfile"
   default     = "LabInstanceProfile"
-}
-
-
-variable "github_access_token" {
-  description = "GitHub Personal Access Token para Amplify (se pedirá al desplegar)"
-  sensitive   = true
-}
-
-variable "github_repo" {
-  description = "URL del repositorio de GitHub para la app Amplify (ej: https://github.com/usuario/mi-repo)"
 }
