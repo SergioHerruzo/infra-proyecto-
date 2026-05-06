@@ -12,3 +12,23 @@ variable "lab_instance_profile_name" {
   description = "The name of the pre-created LabInstanceProfile"
   default     = "LabInstanceProfile"
 }
+
+# -------------------------------------------------------
+# Amplify variables
+# -------------------------------------------------------
+
+variable "github_repo_url" {
+  description = "URL del repositorio GitHub para Amplify (ej: https://github.com/usuario/repo)"
+}
+
+variable "github_token" {
+  description = "GitHub Personal Access Token con permisos repo y admin:repo_hook"
+  sensitive   = true
+}
+
+variable "github_branch" {
+  description = "Rama de GitHub que Amplify desplegará"
+  default     = "main"
+}
+
+

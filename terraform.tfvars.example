@@ -2,6 +2,11 @@ aws_region                = "us-east-1"
 lab_role_name             = "LabRole"
 lab_instance_profile_name = "LabInstanceProfile"
 
-# --- Otros valores opcionales ---
-# cloudflare_api_token  = "YOUR_CLOUDFLARE_API_TOKEN"
-# cloudflare_zone_id    = "YOUR_CLOUDFLARE_ZONE_ID"
+# --- Amplify / GitHub ---
+github_repo_url = "https://github.com/TU_USUARIO/TU_REPO"
+github_token    = "ghp_XXXXXXXXXXXXXXXXXXXXXXXX"
+github_branch   = "main"
+
+# --- API Gateway ---
+# La URL se genera automáticamente desde api_gateway.tf y se inyecta en Amplify
+# No es necesario configurarla manualmente
