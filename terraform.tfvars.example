@@ -1,6 +1,7 @@
 aws_region                = "us-east-1"
 lab_role_name             = "LabRole"
 lab_instance_profile_name = "LabInstanceProfile"
+domain_name               = "tudominio.com"
 
 # --- Amplify / GitHub ---
 github_repo_url = "https://github.com/TU_USUARIO/TU_REPO"

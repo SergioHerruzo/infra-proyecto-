@@ -94,8 +94,8 @@ resource "aws_cognito_user_pool_client" "client" {
   prevent_user_existence_errors = "ENABLED"
 
   # Callback / logout URLs (update with your real URLs)
-  callback_urls = ["https://localhost:3000/callback"]
-  logout_urls   = ["https://localhost:3000/logout"]
+  callback_urls = ["https://${var.domain_name}/callback"]
+  logout_urls   = ["https://${var.domain_name}/logout"]
 }
 
 # -------------------------------------------------------

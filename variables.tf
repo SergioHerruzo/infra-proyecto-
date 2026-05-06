@@ -31,4 +31,12 @@ variable "github_branch" {
   default     = "main"
 }
 
+# -------------------------------------------------------
+# Networking / DNS
+# -------------------------------------------------------
+
+variable "domain_name" {
+  description = "Nombre de dominio público para la aplicación (ej: steamindio.com)"
+}
+
 

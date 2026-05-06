@@ -140,6 +140,16 @@ Infraestructura completa desplegada sobre **AWS Academy** usando Terraform, con 
 
 ---
 
+### 🌐 Networking & DNS — `network.tf`
+| Recurso | Detalle |
+|---|---|
+| `aws_route53_zone` | Zona pública para el dominio personalizado |
+| `aws_amplify_domain_association` | Conecta el dominio con la app de Amplify |
+| `aws_route53_record` (www) | Registro CNAME para `www.dominio.com` |
+| `aws_route53_record` (cert) | Registro CNAME para validación SSL de Amplify |
+
+---
+
 ## 🚀 Instrucciones de despliegue
 
 ### Requisitos previos
@@ -163,6 +173,7 @@ lab_instance_profile_name = "LabInstanceProfile"
 github_repo_url = "https://github.com/TU_USUARIO/TU_REPO"
 github_token    = "ghp_XXXXXXXXXXXXXXXXXXXXXXXX"
 github_branch   = "main"
+domain_name     = "tudominio.com"
 ```
 
 ### 2. Inicializar y desplegar
@@ -216,6 +227,7 @@ steamindio/
 ├── compute_ecs.tf           # ECS Cluster + Task Definition
 ├── compute_beanstalk.tf     # Elastic Beanstalk (workers)
 ├── database_storage.tf      # RDS PostgreSQL + S3 + Security Groups
+├── network.tf               # Route 53 + Amplify Domain Association
 └── outputs.tf               # Outputs de todos los recursos
 ```
 
