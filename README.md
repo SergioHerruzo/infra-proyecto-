@@ -1,4 +1,4 @@
-# 🎮 Steam Indio — Infraestructura AWS con Terraform
+# 🎮 Indie Games — Infraestructura AWS con Terraform
 
 Infraestructura completa desplegada sobre **AWS Academy** usando Terraform, con autenticación, API REST securizada, almacenamiento y hosting de frontend.
 
