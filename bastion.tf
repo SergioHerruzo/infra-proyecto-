@@ -62,7 +62,7 @@ resource "aws_instance" "bastion" {
   instance_type               = "t3.micro"
   subnet_id                   = aws_subnet.public_a.id
   vpc_security_group_ids      = [aws_security_group.bastion_sg.id]
-  associate_public_ip_address = true
+  associate_public_ip_address = false
   key_name                    = var.bastion_key_name
 
   # AWS Academy: usar LabInstanceProfile
@@ -76,11 +76,15 @@ resource "aws_instance" "bastion" {
 
 # Elastic IP para el Bastion
 resource "aws_eip" "bastion" {
-  instance = aws_instance.bastion.id
   domain   = "vpc"
 
   tags = {
     Name    = "steam-bastion-eip"
     Project = "steam-indio"
   }
+}
+
+resource "aws_eip_association" "bastion_assoc" {
+  instance_id   = aws_instance.bastion.id
+  allocation_id = aws_eip.bastion.id
 }

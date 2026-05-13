@@ -167,11 +167,11 @@ resource "aws_security_group" "beanstalk_sg" {
 # --- ECS Fargate ---
 resource "aws_security_group" "ecs_sg" {
   name        = "steam-ecs-sg-${random_string.suffix.result}"
-  description = "Permite tráfico interno al contenedor ECS"
+  description = "Permite trafico interno al contenedor ECS"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "Tráfico de aplicación"
+    description = "Trafico de aplicacion"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"

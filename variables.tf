@@ -44,6 +44,7 @@ variable "domain_name" {
 
 variable "my_ip_cidr" {
   description = "Tu dirección IP pública en formato CIDR (ej: 1.2.3.4/32) para permitir SSH"
+  default     = "0.0.0.0/0"
 }
 
 variable "bastion_key_name" {
