@@ -100,3 +100,12 @@ output "bastion_public_ip" {
   value       = aws_instance.bastion.public_ip
 }
 
+# -------------------------------------------------------
+# Outputs - Lambda
+# -------------------------------------------------------
+
+output "lambda_function_arn" {
+  description = "ARN de la función Lambda de utilidad"
+  value       = aws_lambda_function.main.arn
+}
+

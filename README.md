@@ -167,6 +167,8 @@ La base de datos está en una red privada. Para conectar desde tu PC local:
 ## 🗂️ Estructura de ficheros
 - `vpc.tf`: Red, subnets, IGW y Route Tables.
 - `bastion.tf`: Instancia de acceso seguro y túnel SSH.
+- `lambda.tf`: Función Lambda de utilidad integrada en la VPC.
+- `lambda_function.py`: Código (placeholder) de la función Lambda.
 - `auth.tf`: Cognito User Pool, Client y Dominio.
 - `api_gateway.tf`: API Gateway REST + WAF + Authorizer.
 - `amplify.tf`: Hosting frontend y CI/CD.
