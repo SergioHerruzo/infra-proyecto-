@@ -73,3 +73,14 @@ resource "aws_instance" "bastion" {
     Project = "steam-indio"
   }
 }
+
+# Elastic IP para el Bastion
+resource "aws_eip" "bastion" {
+  instance = aws_instance.bastion.id
+  domain   = "vpc"
+
+  tags = {
+    Name    = "steam-bastion-eip"
+    Project = "steam-indio"
+  }
+}

@@ -144,14 +144,14 @@ terraform apply
 ### 3. Acceso a la Base de Datos (RDS)
 La base de datos está en una red privada. Para conectar desde tu PC local:
 
-1. Obtén la IP del bastion y el endpoint de RDS:
+1. Obtén la IP estática (EIP) del bastion y el endpoint de RDS:
    ```bash
    terraform output bastion_public_ip
    terraform output rds_endpoint
    ```
-2. Crea un túnel SSH:
+2. Crea un túnel SSH (usando la EIP):
    ```bash
-   ssh -i "vockey.pem" -L 5432:[RDS_ENDPOINT]:5432 ec2-user@[BASTION_IP]
+   ssh -i "vockey.pem" -L 5432:[RDS_ENDPOINT]:5432 ec2-user@[BASTION_EIP]
    ```
 3. Conecta tu cliente (DBeaver/psql) a `localhost:5432`.
 

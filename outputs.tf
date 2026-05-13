@@ -96,8 +96,8 @@ output "s3_bucket_name" {
 # -------------------------------------------------------
 
 output "bastion_public_ip" {
-  description = "IP pública del Bastion Host para acceso SSH y túneles"
-  value       = aws_instance.bastion.public_ip
+  description = "IP pública estática (EIP) del Bastion Host"
+  value       = aws_eip.bastion.public_ip
 }
 
 # -------------------------------------------------------
