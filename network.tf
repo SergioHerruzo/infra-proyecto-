@@ -68,7 +68,6 @@ locals {
 }
 
 resource "aws_route53_record" "amplify_cert_verification" {
-  count   = local.cert_record_name != "" ? 1 : 0
   zone_id = aws_route53_zone.main.zone_id
   name    = local.cert_record_name
   type    = "CNAME"
