@@ -9,6 +9,12 @@ resource "aws_amplify_app" "frontend" {
   # GitHub OAuth token (Personal Access Token)
   access_token = var.github_token
 
+  # AWS Academy: Necesario para que Amplify tenga permisos de despliegue
+  iam_service_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.lab_role_name}"
+
+  # Plataforma de la aplicación
+  platform = "WEB"
+
   # Build spec for Vite projects
   build_spec = <<-EOT
     version: 1

@@ -49,13 +49,6 @@ resource "aws_api_gateway_request_validator" "main" {
 # Resources - /health (público) y /{proxy+} (protegido)
 # -------------------------------------------------------
 
-# /health
-resource "aws_api_gateway_resource" "health" {
-  rest_api_id = aws_api_gateway_rest_api.main.id
-  parent_id   = aws_api_gateway_rest_api.main.root_resource_id
-  path_part   = "health"
-}
-
 # /{proxy+}
 resource "aws_api_gateway_resource" "proxy" {
   rest_api_id = aws_api_gateway_rest_api.main.id
@@ -63,27 +56,10 @@ resource "aws_api_gateway_resource" "proxy" {
   path_part   = "{proxy+}"
 }
 
-# /util (Lambda)
-resource "aws_api_gateway_resource" "util" {
-  rest_api_id = aws_api_gateway_rest_api.main.id
-  parent_id   = aws_api_gateway_rest_api.main.root_resource_id
-  path_part   = "util"
-}
-
 
 # -------------------------------------------------------
 # Methods
 # -------------------------------------------------------
-
-# GET /health — sin autenticación
-resource "aws_api_gateway_method" "health_get" {
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  resource_id   = aws_api_gateway_resource.health.id
-  http_method   = "GET"
-  authorization = "NONE"
-
-  request_validator_id = aws_api_gateway_request_validator.main.id
-}
 
 # ANY /{proxy+} — requiere token Cognito
 resource "aws_api_gateway_method" "proxy_any" {
@@ -101,35 +77,9 @@ resource "aws_api_gateway_method" "proxy_any" {
   }
 }
 
-# GET /util — invoca la Lambda
-resource "aws_api_gateway_method" "util_get" {
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  resource_id   = aws_api_gateway_resource.util.id
-  http_method   = "GET"
-  authorization = "NONE" # Pública para pruebas, puedes cambiar a COGNITO_USER_POOLS
-}
-
 # -------------------------------------------------------
 # Integrations
 # -------------------------------------------------------
-
-resource "aws_api_gateway_integration" "util" {
-  rest_api_id             = aws_api_gateway_rest_api.main.id
-  resource_id             = aws_api_gateway_resource.util.id
-  http_method             = aws_api_gateway_method.util_get.http_method
-  integration_http_method = "POST" # Lambda siempre se invoca via POST
-  type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.main.invoke_arn
-}
-
-resource "aws_api_gateway_integration" "health" {
-  rest_api_id             = aws_api_gateway_rest_api.main.id
-  resource_id             = aws_api_gateway_resource.health.id
-  http_method             = aws_api_gateway_method.health_get.http_method
-  type                    = "HTTP_PROXY"
-  integration_http_method = "GET"
-  uri                     = "http://${aws_elastic_beanstalk_environment.prod.cname}/health"
-}
 
 resource "aws_api_gateway_integration" "proxy" {
   rest_api_id             = aws_api_gateway_rest_api.main.id
@@ -156,15 +106,9 @@ resource "aws_api_gateway_deployment" "main" {
   # Fuerza re-deploy al cambiar recursos o métodos
   triggers = {
     redeployment = sha1(jsonencode([
-      aws_api_gateway_resource.health.id,
       aws_api_gateway_resource.proxy.id,
-      aws_api_gateway_resource.util.id,
-      aws_api_gateway_method.health_get.id,
       aws_api_gateway_method.proxy_any.id,
-      aws_api_gateway_method.util_get.id,
-      aws_api_gateway_integration.health.id,
       aws_api_gateway_integration.proxy.id,
-      aws_api_gateway_integration.util.id,
     ]))
   }
 
@@ -173,9 +117,7 @@ resource "aws_api_gateway_deployment" "main" {
   }
 
   depends_on = [
-    aws_api_gateway_integration.health,
     aws_api_gateway_integration.proxy,
-    aws_api_gateway_integration.util,
   ]
 }
 
