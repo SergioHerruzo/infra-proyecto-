@@ -89,6 +89,7 @@ resource "aws_api_gateway_method" "proxy_any" {
 
   request_parameters = {
     "method.request.header.Authorization" = true
+    "method.request.path.proxy"           = true
   }
 }
 
@@ -112,6 +113,8 @@ resource "aws_api_gateway_integration" "proxy" {
   type                    = "HTTP_PROXY"
   integration_http_method = "ANY"
   uri                     = "http://${aws_elastic_beanstalk_environment.prod.cname}/{proxy}"
+
+  cache_key_parameters = ["method.request.path.proxy"]
 
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"

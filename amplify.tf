@@ -30,7 +30,6 @@ resource "aws_amplify_app" "frontend" {
   EOT
 
   # Environment variables injected at build time
-  # Cognito values come from auth.tf, API URL from api_gateway.tf
   environment_variables = {
     VITE_AWS_USER_POOL_ID        = aws_cognito_user_pool.main.id
     VITE_AWS_USER_POOL_CLIENT_ID = aws_cognito_user_pool_client.client.id

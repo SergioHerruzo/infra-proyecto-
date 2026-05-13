@@ -46,3 +46,57 @@ output "api_gateway_key" {
   value       = aws_api_gateway_api_key.frontend.value
   sensitive   = true
 }
+
+# -------------------------------------------------------
+# Outputs - VPC & Networking
+# -------------------------------------------------------
+
+output "vpc_id" {
+  description = "ID de la VPC principal"
+  value       = aws_vpc.main.id
+}
+
+output "public_subnet_ids" {
+  description = "IDs de las subnets públicas (Beanstalk + ECS)"
+  value       = [aws_subnet.public_a.id, aws_subnet.public_b.id]
+}
+
+output "private_subnet_ids" {
+  description = "IDs de las subnets privadas (RDS)"
+  value       = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+}
+
+# -------------------------------------------------------
+# Outputs - Compute
+# -------------------------------------------------------
+
+output "beanstalk_cname" {
+  description = "CNAME del entorno Beanstalk (backend)"
+  value       = aws_elastic_beanstalk_environment.prod.cname
+}
+
+output "ecs_service_name" {
+  description = "Nombre del servicio ECS"
+  value       = aws_ecs_service.game_api.name
+}
+
+output "rds_endpoint" {
+  description = "Endpoint de RDS PostgreSQL"
+  value       = aws_db_instance.postgres.endpoint
+  sensitive   = true
+}
+
+output "s3_bucket_name" {
+  description = "Nombre del bucket S3 de almacenamiento"
+  value       = aws_s3_bucket.game_storage.id
+}
+
+# -------------------------------------------------------
+# Outputs - Bastion
+# -------------------------------------------------------
+
+output "bastion_public_ip" {
+  description = "IP pública del Bastion Host para acceso SSH y túneles"
+  value       = aws_instance.bastion.public_ip
+}
+

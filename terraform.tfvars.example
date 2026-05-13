@@ -8,6 +8,6 @@ github_repo_url = "https://github.com/TU_USUARIO/TU_REPO"
 github_token    = "ghp_XXXXXXXXXXXXXXXXXXXXXXXX"
 github_branch   = "main"
 
-# --- API Gateway ---
-# La URL se genera automáticamente desde api_gateway.tf y se inyecta en Amplify
-# No es necesario configurarla manualmente
+# --- Bastion / Acceso ---
+my_ip_cidr       = "TU_IP_PUBLICA/32"
+bastion_key_name = "vockey" # Nombre del key pair descargado de AWS Academy

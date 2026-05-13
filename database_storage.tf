@@ -18,7 +18,25 @@ resource "aws_s3_bucket_public_access_block" "game_storage" {
   restrict_public_buckets = true
 }
 
+# -------------------------------------------------------
+# RDS — Subnet Group (requiere mínimo 2 AZs)
+# -------------------------------------------------------
+
+resource "aws_db_subnet_group" "postgres" {
+  name        = "steam-db-subnet-group-${random_string.suffix.result}"
+  description = "Subnets privadas para RDS PostgreSQL"
+  subnet_ids  = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+
+  tags = {
+    Name    = "steam-db-subnet-group"
+    Project = "steam-indio"
+  }
+}
+
+# -------------------------------------------------------
 # RDS PostgreSQL
+# -------------------------------------------------------
+
 resource "aws_db_instance" "postgres" {
   allocated_storage    = 20
   db_name              = "personalsteam"
@@ -26,26 +44,38 @@ resource "aws_db_instance" "postgres" {
   engine_version       = "15"
   instance_class       = "db.t3.micro"
   username             = "steamadmin"
-  password             = "steam_secure_password" # In production, use a secret manager
+  password             = "steam_secure_password" # En producción usar Secrets Manager
   parameter_group_name = "default.postgres15"
   skip_final_snapshot  = true
   storage_encrypted    = true
-  
-  # Using default KMS key for RDS as custom key creation is often blocked in Academy
+
+  # Using default KMS key for RDS (custom key creation blocked in Academy)
   kms_key_id = "arn:aws:kms:${var.aws_region}:${data.aws_caller_identity.current.account_id}:alias/aws/rds"
-  
+
+  db_subnet_group_name   = aws_db_subnet_group.postgres.name
   vpc_security_group_ids = [aws_security_group.db_sg.id]
+
+  tags = {
+    Name    = "steam-postgres"
+    Project = "steam-indio"
+  }
 }
+
+# -------------------------------------------------------
+# Security Group — RDS (solo tráfico interno VPC)
+# -------------------------------------------------------
 
 resource "aws_security_group" "db_sg" {
   name        = "steam-rds-sg-${random_string.suffix.result}"
-  description = "Allow incoming traffic to RDS"
+  description = "Allow PostgreSQL only from within the VPC"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
+    description = "PostgreSQL desde la VPC"
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Narrow this down to your VPC CIDR in production
+    cidr_blocks = ["10.0.0.0/16"]
   }
 
   egress {
@@ -53,5 +83,10 @@ resource "aws_security_group" "db_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name    = "steam-rds-sg"
+    Project = "steam-indio"
   }
 }

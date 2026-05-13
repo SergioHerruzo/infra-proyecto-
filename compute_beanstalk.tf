@@ -14,7 +14,7 @@ resource "aws_elastic_beanstalk_environment" "prod" {
   application         = aws_elastic_beanstalk_application.steam_workers.name
   solution_stack_name = data.aws_elastic_beanstalk_solution_stack.docker.name
 
-  # AWS Academy: Use Single Instance to save credits, but can be changed to LoadBalanced
+  # AWS Academy: Single Instance to save credits
   setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "EnvironmentType"
@@ -27,13 +27,38 @@ resource "aws_elastic_beanstalk_environment" "prod" {
     value     = "t3.medium"
   }
 
-  # AWS Academy: Critical - Use the pre-created Instance Profile
+  # AWS Academy: pre-created Instance Profile
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "IamInstanceProfile"
     value     = var.lab_instance_profile_name
   }
 
-  # Service Role is also required but in Academy it's usually pre-linked
-  # If it fails, you might need to specify the LabRole ARN here too if the trust is there.
+  # Security group
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "SecurityGroups"
+    value     = aws_security_group.beanstalk_sg.id
+  }
+
+  # VPC
+  setting {
+    namespace = "aws:ec2:vpc"
+    name      = "VPCId"
+    value     = aws_vpc.main.id
+  }
+
+  # Subnet pública para la instancia (SingleInstance no usa ELB)
+  setting {
+    namespace = "aws:ec2:vpc"
+    name      = "Subnets"
+    value     = aws_subnet.public_a.id
+  }
+
+  # Asignar IP pública para que API Gateway HTTP_PROXY pueda alcanzarla
+  setting {
+    namespace = "aws:ec2:vpc"
+    name      = "AssociatePublicIpAddress"
+    value     = "true"
+  }
 }

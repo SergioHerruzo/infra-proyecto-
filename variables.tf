@@ -38,5 +38,15 @@ variable "github_branch" {
 variable "domain_name" {
   description = "Nombre de dominio público para la aplicación (ej: steamindio.com)"
 }
+# -------------------------------------------------------
+# Bastion / Access
+# -------------------------------------------------------
 
+variable "my_ip_cidr" {
+  description = "Tu dirección IP pública en formato CIDR (ej: 1.2.3.4/32) para permitir SSH"
+}
 
+variable "bastion_key_name" {
+  description = "Nombre del Key Pair de EC2 existente para acceder al bastion (ej: vockey)"
+  default     = "vockey"
+}
