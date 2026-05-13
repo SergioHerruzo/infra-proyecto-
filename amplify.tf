@@ -9,9 +9,6 @@ resource "aws_amplify_app" "frontend" {
   # GitHub OAuth token (Personal Access Token)
   access_token = var.github_token
 
-  # Auto-build on push to tracked branches
-  enable_auto_build = true
-
   # Build spec for Vite projects
   build_spec = <<-EOT
     version: 1
