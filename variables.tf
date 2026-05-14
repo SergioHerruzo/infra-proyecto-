@@ -18,16 +18,25 @@ variable "lab_instance_profile_name" {
 # -------------------------------------------------------
 
 variable "github_repo_url" {
-  description = "URL del repositorio GitHub para Amplify (ej: https://github.com/usuario/repo)"
+  description = "URL del repositorio GitHub para la web de USUARIOS (PROD)"
+}
+
+variable "github_repo_url_dev" {
+  description = "URL del repositorio GitHub para la web de DEVS (DEV)"
 }
 
 variable "github_token" {
-  description = "GitHub Personal Access Token con permisos repo y admin:repo_hook"
+  description = "GitHub Personal Access Token"
   sensitive   = true
 }
 
 variable "github_branch" {
-  description = "Rama de GitHub que Amplify desplegará"
+  description = "Rama para la web de PROD"
+  default     = "main"
+}
+
+variable "github_branch_dev" {
+  description = "Rama para la web de DEV"
   default     = "main"
 }
 

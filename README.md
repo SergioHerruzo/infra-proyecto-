@@ -11,14 +11,16 @@ Infraestructura completa desplegada sobre **AWS Academy** usando Terraform, con 
 │                         USUARIO FINAL                           │
 └───────────────────────────────┬─────────────────────────────────┘
                                 │ HTTPS
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    AWS Amplify (Frontend)                        │
-│              React/Vite — desplegado desde GitHub               │
-│  ENV: VITE_AWS_USER_POOL_ID · VITE_AWS_USER_POOL_CLIENT_ID     │
-│        VITE_API_URL                                             │
-└───────────────────────────────┬─────────────────────────────────┘
-                                │
+                ┌───────────────┴───────────────┐
+                ▼                               ▼
+┌───────────────────────────────┐ ┌───────────────────────────────┐
+│     AWS Amplify (PROD)        │ │      AWS Amplify (DEV)        │
+│ Repo: Usuarios (Rama main)    │ │ Repo: Developers (Rama dev)   │
+│ URL: tudominio.com            │ │ URL: dev.tudominio.com        │
+└───────────────┬───────────────┘ └───────────────┬───────────────┘
+                │                                 │
+                └────────────────┬────────────────┘
+                                 │
                ┌────────────────┼──────────────────┐
                │                │                  │
                ▼                ▼                  ▼
@@ -120,8 +122,13 @@ Infraestructura completa desplegada sobre **AWS Academy** usando Terraform, con 
 ---
 
 ### 📱 Frontend — `amplify.tf`
+| Entorno | Repositorio | URL |
+|---|---|---|
+| **Producción** | `var.github_repo_url` | `www.tudominio.com` |
+| **Desarrollo** | `var.github_repo_url_dev` | `dev.tudominio.com` |
+
 - **Variables de entorno inyectadas:** `VITE_AWS_USER_POOL_ID`, `VITE_AWS_USER_POOL_CLIENT_ID`, `VITE_API_URL`.
-- **Academy Compatibility:** Uso de `LabRole` para permisos de despliegue y auto-build.
+- **CI/CD:** Cada aplicación es independiente y se despliega automáticamente al hacer push a su respectivo repositorio.
 
 ---
 
@@ -131,10 +138,11 @@ Infraestructura completa desplegada sobre **AWS Academy** usando Terraform, con 
 Crea tu `terraform.tfvars` basándote en el example:
 
 ```hcl
-aws_region       = "us-east-1"
-domain_name      = "tudominio.com"
-github_repo_url  = "https://github.com/..."
-github_token     = "ghp_..."
+aws_region          = "us-east-1"
+domain_name         = "tudominio.com"
+github_repo_url     = "https://github.com/usuario/repo-prod"
+github_repo_url_dev = "https://github.com/usuario/repo-dev"
+github_token        = "ghp_..."
 my_ip_cidr       = "1.2.3.4/32" # Opcional (defecto: 0.0.0.0/0)
 bastion_key_name = "vockey"     # Key pair de Academy (opcional, defecto vockey)
 ```

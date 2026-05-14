@@ -109,3 +109,17 @@ output "lambda_function_arn" {
   value       = aws_lambda_function.main.arn
 }
 
+# -------------------------------------------------------
+# Outputs - Amplify (Frontend)
+# -------------------------------------------------------
+
+output "amplify_app_url_prod" {
+  description = "URL de producción (rama main)"
+  value       = "https://www.${var.domain_name}"
+}
+
+output "amplify_app_url_dev" {
+  description = "URL de desarrollo (rama develop)"
+  value       = "https://dev.${var.domain_name}"
+}
+

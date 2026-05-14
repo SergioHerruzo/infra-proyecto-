@@ -18,59 +18,96 @@ resource "aws_route53_zone" "main" {
 # automáticamente en cuanto los NS apunten a esta zona.
 # -------------------------------------------------------
 
-resource "aws_amplify_domain_association" "main" {
-  app_id      = aws_amplify_app.frontend.id
+# -------------------------------------------------------
+# Amplify - Asociación de dominio para PROD (apex + www)
+# -------------------------------------------------------
+
+resource "aws_amplify_domain_association" "prod" {
+  app_id      = aws_amplify_app.prod.id
   domain_name = var.domain_name
 
-  # No bloquear el apply esperando la verificación del cert;
-  # la verificación se completará sola cuando los NS estén propagados.
   wait_for_verification = false
 
-  # Dominio raíz (apex) → rama principal
+  # Dominio raíz (apex) -> rama principal
   sub_domain {
-    branch_name = aws_amplify_branch.main.branch_name
+    branch_name = aws_amplify_branch.prod_main.branch_name
     prefix      = ""
   }
 
-  # www.dominio.com → rama principal
+  # www.dominio.com -> rama principal
   sub_domain {
-    branch_name = aws_amplify_branch.main.branch_name
+    branch_name = aws_amplify_branch.prod_main.branch_name
     prefix      = "www"
   }
 }
 
 # -------------------------------------------------------
-# Route 53 — Registros CNAME para los subdominios de Amplify
-# Amplify usa su propia CDN: <branch>.<app-id>.amplifyapp.com
+# Amplify - Asociación de dominio para DEV (dev subdomain)
 # -------------------------------------------------------
 
-# www.dominio.com → CDN de Amplify
+resource "aws_amplify_domain_association" "dev" {
+  app_id      = aws_amplify_app.dev.id
+  domain_name = var.domain_name
+
+  wait_for_verification = false
+
+  # dev.dominio.com -> rama principal de dev
+  sub_domain {
+    branch_name = aws_amplify_branch.dev_main.branch_name
+    prefix      = "dev"
+  }
+}
+
+# -------------------------------------------------------
+# Route 53 — Registros CNAME para los subdominios de Amplify
+# -------------------------------------------------------
+
+# www.dominio.com → CDN de Amplify PROD
 resource "aws_route53_record" "amplify_www" {
   zone_id = aws_route53_zone.main.zone_id
   name    = "www.${var.domain_name}"
   type    = "CNAME"
   ttl     = 300
-  records = ["${var.github_branch}.${aws_amplify_app.frontend.id}.amplifyapp.com"]
+  records = ["${var.github_branch}.${aws_amplify_app.prod.id}.amplifyapp.com"]
+}
+
+# dev.dominio.com → CDN de Amplify DEV
+resource "aws_route53_record" "amplify_dev" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "dev.${var.domain_name}"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["${var.github_branch_dev}.${aws_amplify_app.dev.id}.amplifyapp.com"]
 }
 
 # -------------------------------------------------------
-# Route 53 — Registro de verificación de certificado ACM
-# Amplify genera este registro tras crear el domain_association.
-# Lo construimos a partir del atributo certificate_verification_dns_record.
-# Formato: "<name> CNAME <value>"
+# Route 53 — Registros de verificación de certificado ACM
 # -------------------------------------------------------
 
 locals {
-  # Separa "name CNAME value" en partes
-  cert_record_parts = split(" ", aws_amplify_domain_association.main.certificate_verification_dns_record)
-  cert_record_name  = length(local.cert_record_parts) >= 3 ? local.cert_record_parts[0] : ""
-  cert_record_value = length(local.cert_record_parts) >= 3 ? local.cert_record_parts[2] : ""
+  # Verificación PROD
+  cert_prod_parts = split(" ", aws_amplify_domain_association.prod.certificate_verification_dns_record)
+  cert_prod_name  = length(local.cert_prod_parts) >= 3 ? local.cert_prod_parts[0] : ""
+  cert_prod_value = length(local.cert_prod_parts) >= 3 ? local.cert_prod_parts[2] : ""
+
+  # Verificación DEV
+  cert_dev_parts = split(" ", aws_amplify_domain_association.dev.certificate_verification_dns_record)
+  cert_dev_name  = length(local.cert_dev_parts) >= 3 ? local.cert_dev_parts[0] : ""
+  cert_dev_value = length(local.cert_dev_parts) >= 3 ? local.cert_dev_parts[2] : ""
 }
 
-resource "aws_route53_record" "amplify_cert_verification" {
+resource "aws_route53_record" "amplify_prod_verification" {
   zone_id = aws_route53_zone.main.zone_id
-  name    = local.cert_record_name
+  name    = local.cert_prod_name
   type    = "CNAME"
   ttl     = 300
-  records = [local.cert_record_value]
+  records = [local.cert_prod_value]
+}
+
+resource "aws_route53_record" "amplify_dev_verification" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = local.cert_dev_name
+  type    = "CNAME"
+  ttl     = 300
+  records = [local.cert_dev_value]
 }
