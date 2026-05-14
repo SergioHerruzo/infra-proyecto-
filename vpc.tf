@@ -82,6 +82,33 @@ resource "aws_internet_gateway" "main" {
 }
 
 # -------------------------------------------------------
+# NAT Gateway — Para dar salida a Internet a subredes privadas
+# (Necesario para que la Lambda en VPC conecte a Cognito)
+# -------------------------------------------------------
+
+resource "aws_eip" "nat" {
+  domain = "vpc"
+
+  tags = {
+    Name    = "steam-nat-eip"
+    Project = "steam-indio"
+  }
+}
+
+resource "aws_nat_gateway" "main" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public_a.id # Ubicado en subred pública
+
+  tags = {
+    Name    = "steam-nat-gw"
+    Project = "steam-indio"
+  }
+
+  # Recomendado: esperar a que el IGW esté listo
+  depends_on = [aws_internet_gateway.main]
+}
+
+# -------------------------------------------------------
 # Route table — pública (con salida a Internet)
 # -------------------------------------------------------
 
@@ -116,6 +143,11 @@ resource "aws_route_table_association" "public_b" {
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.main.id
+  }
 
   tags = {
     Name    = "steam-rt-private"

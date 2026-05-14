@@ -41,15 +41,16 @@ Infraestructura completa desplegada sobre **AWS Academy** usando Terraform, con 
                │   VPC (10.0.0.0/16)               │
                │                                   │
                ▼                                   ▼
- ┌───────────────────────────┐       ┌───────────────────────────┐
- │ Subnets Públicas (AZ a/b) │       │ Subnets Privadas (AZ a/b) │
- ├───────────────────────────┤       ├───────────────────────────┤
- │ · Elastic Beanstalk       │       │ · RDS PostgreSQL          │
- │ · ECS Fargate Service     │       │                           │
- │ · Bastion Host (EIP)      │       └───────────────────────────┘
- └─────────────┬─────────────┘                     ▲
-               │                                   │
-               └─────────────────┬─────────────────┘
+  ┌───────────────────────────┐       ┌───────────────────────────┐
+  │ Subnets Públicas (AZ a/b) │       │ Subnets Privadas (AZ a/b) │
+  ├───────────────────────────┤       ├───────────────────────────┤
+  │ · Elastic Beanstalk       │       │ · RDS PostgreSQL          │
+  │ · ECS Fargate Service     │       │ · Lambda (Utility)        │
+  │ · Bastion Host (EIP)      │       └─────────────┬─────────────┘
+  │ · NAT Gateway             │                     │
+  └─────────────┬─────────────┘                     │
+                │             Salida Internet       │
+                ◀───────────────────────────────────┘
                                  │
                                  ▼
                      ┌──────────────────────┐
@@ -67,8 +68,9 @@ Infraestructura completa desplegada sobre **AWS Academy** usando Terraform, con 
 | Recurso | Detalle |
 |---|---|
 | `aws_vpc` | CIDR `10.0.0.0/16` |
-| `aws_subnet` | 2 Públicas (app) + 2 Privadas (datos) |
+| `aws_subnet` | 2 Públicas (app) + 2 Privadas (datos/Lambda) |
 | `aws_internet_gateway` | Salida a Internet para subnets públicas |
+| `aws_nat_gateway` | Salida a Internet para la Lambda (acceso Cognito) |
 | `aws_instance` (Bastion) | Acceso SSH seguro vía Elastic IP (EIP) y túnel RDS |
 
 ### 🔐 Autenticación — `auth.tf`
@@ -160,7 +162,7 @@ La base de datos está en una red privada. Para conectar desde tu PC local:
 ---
 
 ## ⚠️ Consideraciones AWS Academy
-- **Sin NAT Gateway:** Las instancias usan IP pública para ahorrar costes.
+- **NAT Gateway:** Se incluye un solo NAT Gateway para permitir que la Lambda en subred privada conecte con Cognito sin perder seguridad.
 - **Roles:** Se usa el `LabRole` y el `LabInstanceProfile` pre-existentes.
 - **WAF:** Si tu cuenta de Academy tiene restricciones en WAF, comenta el bloque `aws_wafv2_web_acl_association`.
 
