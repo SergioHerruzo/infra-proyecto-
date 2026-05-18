@@ -64,20 +64,22 @@ resource "aws_amplify_domain_association" "dev" {
 
 # www.dominio.com → CDN de Amplify PROD
 resource "aws_route53_record" "amplify_www" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "www.${var.domain_name}"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["${var.github_branch}.${aws_amplify_app.prod.id}.amplifyapp.com"]
+  zone_id         = aws_route53_zone.main.zone_id
+  name            = "www.${var.domain_name}"
+  type            = "CNAME"
+  ttl             = 300
+  records         = ["${var.github_branch}.${aws_amplify_app.prod.id}.amplifyapp.com"]
+  allow_overwrite = true
 }
 
 # dev.dominio.com → CDN de Amplify DEV
 resource "aws_route53_record" "amplify_dev" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "dev.${var.domain_name}"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["${var.github_branch_dev}.${aws_amplify_app.dev.id}.amplifyapp.com"]
+  zone_id         = aws_route53_zone.main.zone_id
+  name            = "dev.${var.domain_name}"
+  type            = "CNAME"
+  ttl             = 300
+  records         = ["${var.github_branch_dev}.${aws_amplify_app.dev.id}.amplifyapp.com"]
+  allow_overwrite = true
 }
 
 # -------------------------------------------------------
@@ -97,17 +99,19 @@ locals {
 }
 
 resource "aws_route53_record" "amplify_prod_verification" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = local.cert_prod_name
-  type    = "CNAME"
-  ttl     = 300
-  records = [local.cert_prod_value]
+  zone_id         = aws_route53_zone.main.zone_id
+  name            = local.cert_prod_name
+  type            = "CNAME"
+  ttl             = 300
+  records         = [local.cert_prod_value]
+  allow_overwrite = true
 }
 
 resource "aws_route53_record" "amplify_dev_verification" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = local.cert_dev_name
-  type    = "CNAME"
-  ttl     = 300
-  records = [local.cert_dev_value]
+  zone_id         = aws_route53_zone.main.zone_id
+  name            = local.cert_dev_name
+  type            = "CNAME"
+  ttl             = 300
+  records         = [local.cert_dev_value]
+  allow_overwrite = true
 }
