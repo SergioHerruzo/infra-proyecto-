@@ -46,10 +46,9 @@ Infraestructura completa desplegada sobre **AWS Academy** usando Terraform, con 
   ┌───────────────────────────┐       ┌───────────────────────────┐
   │ Subnets Públicas (AZ a/b) │       │ Subnets Privadas (AZ a/b) │
   ├───────────────────────────┤       ├───────────────────────────┤
-  │ · Elastic Beanstalk       │       │ · RDS PostgreSQL          │
-  │ · ECS Fargate Service     │       │ · Lambda (Utility)        │
-  │ · Bastion Host (EIP)      │       └─────────────┬─────────────┘
-  │ · NAT Gateway             │                     │
+  │ · EC2 Backend (Docker)    │       │ · RDS PostgreSQL          │
+  │ · Bastion Host (EIP)      │       │ · Lambda (Utility)        │
+  │ · NAT Gateway             │       └─────────────┬─────────────┘
   └─────────────┬─────────────┘                     │
                 │             Salida Internet       │
                 ◀───────────────────────────────────┘
@@ -101,14 +100,20 @@ Infraestructura completa desplegada sobre **AWS Academy** usando Terraform, con 
 
 ---
 
-### 🖥️ Compute — `compute_ecs.tf` / `compute_beanstalk.tf`
+### 🖥️ Compute — `compute_ec2.tf`
 | Servicio | Recurso | Uso |
 |---|---|---|
-| ECS Fargate | `steam-cluster` + `game-api` | API de videojuegos (Fargate Service) |
-| Elastic Beanstalk | `steam-workers-prod` | Workers / procesos en segundo plano (Docker) |
+| EC2 | `aws_instance.backend` | Backend alojado en contenedor Docker |
 
-- **Networking:** Desplegados en subnets públicas con IP pública asignada (ahorro de NAT Gateway en Academy).
-- **Seguridad:** SGs específicos que solo permiten tráfico HTTP desde el API Gateway.
+- **Networking:** Desplegado en subnet pública con IP pública para simplificar el acceso a internet y conexión con API Gateway.
+- **Configuración:** Utiliza `user_data` para instalar Docker, Docker Compose y Git en el arranque de la instancia.
+
+---
+
+### ✉️ Mensajería — `messaging.tf`
+| Recurso | Detalle |
+|---|---|
+| `aws_sqs_queue` | Cola estándar de SQS (`steam-messages-queue`) para procesos asíncronos. |
 
 ---
 
@@ -184,7 +189,9 @@ La base de datos está en una red privada. Para conectar desde tu PC local:
 - `auth.tf`: Cognito User Pool, Client y Dominio.
 - `api_gateway.tf`: API Gateway REST + WAF + Authorizer.
 - `amplify.tf`: Hosting frontend y CI/CD.
-- `compute_*.tf`: Infraestructura de cómputo (ECS/EB).
+- `compute_ec2.tf`: Instancia EC2 para alojar el backend (Docker).
+- `messaging.tf`: Colas SQS para mensajería.
+- `acm.tf`: Configuración de certificados ACM.
 - `database_storage.tf`: RDS PostgreSQL y S3.
 - `outputs.tf`: Información clave post-despliegue.
 
