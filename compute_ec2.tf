@@ -3,7 +3,7 @@
 # -------------------------------------------------------
 
 # Buscar la AMI más reciente de Amazon Linux 2023
-data "aws_ami" "amazon_linux_2023" {
+data "aws_ami" "amazon_linux_2023_backend" {
   most_recent = true
   owners      = ["amazon"]
 
@@ -14,7 +14,7 @@ data "aws_ami" "amazon_linux_2023" {
 }
 
 resource "aws_instance" "backend" {
-  ami           = data.aws_ami.amazon_linux_2023.id
+  ami           = data.aws_ami.amazon_linux_2023_backend.id
   instance_type = "t3.small"
 
   # Ubicación en subred pública para acceso directo a internet y API Gateway
