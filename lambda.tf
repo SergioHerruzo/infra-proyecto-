@@ -36,7 +36,37 @@ resource "aws_lambda_function" "main" {
   environment {
     variables = {
       ENV          = "production"
-      DATABASE_URL = "postgresql://steamadmin:steam_secure_password@${aws_db_instance.postgres.endpoint}/personalsteam"
+      DATABASE_URL = "postgresql://admin:Pirineus12!@${aws_db_instance.postgres.endpoint}/postgres"
+
+      # Authentication
+      Authentication__Region                = var.aws_region
+      Authentication__Authority             = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.main.id}"
+      Authentication__UserPoolId            = aws_cognito_user_pool.main.id
+      Authentication__ClientId              = aws_cognito_user_pool_client.client.id
+      Authentication__AuthorizationEndpoint = "https://${aws_cognito_user_pool_domain.main.domain}.auth.${var.aws_region}.amazoncognito.com/oauth2/authorize"
+      Authentication__TokenEndpoint         = "https://${aws_cognito_user_pool_domain.main.domain}.auth.${var.aws_region}.amazoncognito.com/oauth2/token"
+
+      # Database
+      Database__ConnectionString = "Host=${aws_db_instance.postgres.address};Port=5432;Database=${aws_db_instance.postgres.db_name};Username=admin;Password=Pirineus12!;SSL Mode=VerifyFull;Root Certificate=./global-bundle.pem"
+
+      # S3
+      S3__Region       = var.aws_region
+      S3__BucketName   = aws_s3_bucket.game_storage.id
+      S3__AccessKey    = var.academy_aws_access_key
+      S3__SecretKey    = var.academy_aws_secret_key
+      S3__SessionToken = var.academy_aws_session_token
+
+      # Messaging (SQS)
+      Messaging__Address      = var.aws_region
+      Messaging__AccessKey    = var.academy_aws_access_key
+      Messaging__SecretKey    = var.academy_aws_secret_key
+      Messaging__SessionToken = var.academy_aws_session_token
+
+      # Stripe
+      Stripe__SecretKey      = var.stripe_secret_key
+      Stripe__WebhookSecret  = var.stripe_webhook_secret
+      Stripe__PublishableKey = var.stripe_publishable_key
+      Stripe__Currency       = var.stripe_currency
     }
   }
 

@@ -169,18 +169,26 @@ resource "aws_route_table_association" "private_b" {
 # Security Groups por servicio
 # -------------------------------------------------------
 
-# --- Beanstalk (backend HTTP) ---
-resource "aws_security_group" "beanstalk_sg" {
-  name        = "steam-beanstalk-sg-${random_string.suffix.result}"
-  description = "Permite HTTP desde API Gateway y salida libre"
+# --- Backend EC2 (Docker) ---
+resource "aws_security_group" "backend_ec2_sg" {
+  name        = "steam-backend-ec2-sg-${random_string.suffix.result}"
+  description = "Permite HTTP desde API Gateway y SSH desde administrador"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "HTTP desde API Gateway (HTTP_PROXY)"
+    description = "HTTP desde API Gateway (o internet publico)"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "SSH para administracion"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.my_ip_cidr]
   }
 
   egress {
@@ -191,34 +199,7 @@ resource "aws_security_group" "beanstalk_sg" {
   }
 
   tags = {
-    Name    = "steam-beanstalk-sg"
-    Project = "steam-indio"
-  }
-}
-
-# --- ECS Fargate ---
-resource "aws_security_group" "ecs_sg" {
-  name        = "steam-ecs-sg-${random_string.suffix.result}"
-  description = "Permite trafico interno al contenedor ECS"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    description = "Trafico de aplicacion"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name    = "steam-ecs-sg"
+    Name    = "steam-backend-ec2-sg"
     Project = "steam-indio"
   }
 }

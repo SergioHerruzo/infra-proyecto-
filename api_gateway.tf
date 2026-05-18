@@ -87,7 +87,7 @@ resource "aws_api_gateway_integration" "proxy" {
   http_method             = aws_api_gateway_method.proxy_any.http_method
   type                    = "HTTP_PROXY"
   integration_http_method = "ANY"
-  uri                     = "http://${aws_elastic_beanstalk_environment.prod.cname}/{proxy}"
+  uri                     = "http://${aws_instance.backend.public_dns}/{proxy}"
 
   cache_key_parameters = ["method.request.path.proxy"]
 

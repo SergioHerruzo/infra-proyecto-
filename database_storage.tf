@@ -39,12 +39,12 @@ resource "aws_db_subnet_group" "postgres" {
 
 resource "aws_db_instance" "postgres" {
   allocated_storage    = 20
-  db_name              = "personalsteam"
+  db_name              = "postgres"
   engine               = "postgres"
   engine_version       = "15"
   instance_class       = "db.t3.micro"
-  username             = "steamadmin"
-  password             = "steam_secure_password" # En producción usar Secrets Manager
+  username             = "admin"
+  password             = "Pirineus12!" # En producción usar Secrets Manager
   parameter_group_name = "default.postgres15"
   skip_final_snapshot  = true
   storage_encrypted    = true

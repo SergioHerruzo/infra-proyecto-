@@ -60,3 +60,46 @@ variable "bastion_key_name" {
   description = "Nombre del Key Pair de EC2 existente para acceder al bastion (ej: vockey)"
   default     = "vockey"
 }
+
+# -------------------------------------------------------
+# Stripe Config
+# -------------------------------------------------------
+
+variable "stripe_secret_key" {
+  description = "Stripe Secret Key"
+  default     = ""
+}
+
+variable "stripe_webhook_secret" {
+  description = "Stripe Webhook Secret"
+  default     = ""
+}
+
+variable "stripe_publishable_key" {
+  description = "Stripe Publishable Key"
+  default     = ""
+}
+
+variable "stripe_currency" {
+  description = "Stripe Currency"
+  default     = "eur"
+}
+
+# -------------------------------------------------------
+# AWS Academy Temporary Credentials (not recommended for prod)
+# -------------------------------------------------------
+
+variable "academy_aws_access_key" {
+  description = "AWS Academy Access Key"
+  default     = ""
+}
+
+variable "academy_aws_secret_key" {
+  description = "AWS Academy Secret Key"
+  default     = ""
+}
+
+variable "academy_aws_session_token" {
+  description = "AWS Academy Session Token"
+  default     = ""
+}

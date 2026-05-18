@@ -70,14 +70,14 @@ output "private_subnet_ids" {
 # Outputs - Compute
 # -------------------------------------------------------
 
-output "beanstalk_cname" {
-  description = "CNAME del entorno Beanstalk (backend)"
-  value       = aws_elastic_beanstalk_environment.prod.cname
+output "backend_ec2_public_ip" {
+  description = "IP publica de la instancia EC2 del backend"
+  value       = aws_instance.backend.public_ip
 }
 
-output "ecs_service_name" {
-  description = "Nombre del servicio ECS"
-  value       = aws_ecs_service.game_api.name
+output "backend_ec2_public_dns" {
+  description = "DNS publico de la instancia EC2 del backend"
+  value       = aws_instance.backend.public_dns
 }
 
 output "rds_endpoint" {
