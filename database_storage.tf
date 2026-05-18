@@ -43,7 +43,7 @@ resource "aws_db_instance" "postgres" {
   engine               = "postgres"
   engine_version       = "15"
   instance_class       = "db.t3.micro"
-  username             = "admin"
+  username             = "dbadmin"
   password             = "Pirineus12!" # En producción usar Secrets Manager
   parameter_group_name = "default.postgres15"
   skip_final_snapshot  = true
