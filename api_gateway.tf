@@ -21,7 +21,7 @@ resource "aws_api_gateway_rest_api" "main" {
 }
 
 # -------------------------------------------------------
-# Resources - /health (público) y raíz (/)
+# Resources - /health (público), raíz (/) y /{proxy+}
 # -------------------------------------------------------
 
 # /health
@@ -29,6 +29,13 @@ resource "aws_api_gateway_resource" "health" {
   rest_api_id = aws_api_gateway_rest_api.main.id
   parent_id   = aws_api_gateway_rest_api.main.root_resource_id
   path_part   = "health"
+}
+
+# /{proxy+}
+resource "aws_api_gateway_resource" "proxy" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_rest_api.main.root_resource_id
+  path_part   = "{proxy+}"
 }
 
 # -------------------------------------------------------
@@ -39,6 +46,14 @@ resource "aws_api_gateway_resource" "health" {
 resource "aws_api_gateway_method" "root_any" {
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_rest_api.main.root_resource_id
+  http_method   = "ANY"
+  authorization = "NONE"
+}
+
+# ANY /{proxy+} — sin autorización
+resource "aws_api_gateway_method" "proxy_any" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id   = aws_api_gateway_resource.proxy.id
   http_method   = "ANY"
   authorization = "NONE"
 }
@@ -65,6 +80,16 @@ resource "aws_api_gateway_integration" "root" {
   uri                     = aws_lambda_function.main.invoke_arn
 }
 
+# Integración para /{proxy+}
+resource "aws_api_gateway_integration" "proxy" {
+  rest_api_id             = aws_api_gateway_rest_api.main.id
+  resource_id             = aws_api_gateway_resource.proxy.id
+  http_method             = aws_api_gateway_method.proxy_any.http_method
+  type                    = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri                     = aws_lambda_function.main.invoke_arn
+}
+
 # Integración para /health
 resource "aws_api_gateway_integration" "health" {
   rest_api_id             = aws_api_gateway_rest_api.main.id
@@ -85,6 +110,9 @@ resource "aws_api_gateway_deployment" "main" {
   # Fuerza re-deploy al cambiar recursos o métodos
   triggers = {
     redeployment = sha1(jsonencode([
+      aws_api_gateway_resource.proxy.id,
+      aws_api_gateway_method.proxy_any.id,
+      aws_api_gateway_integration.proxy.id,
       aws_api_gateway_method.root_any.id,
       aws_api_gateway_integration.root.id,
       aws_api_gateway_resource.health.id,
@@ -98,6 +126,7 @@ resource "aws_api_gateway_deployment" "main" {
   }
 
   depends_on = [
+    aws_api_gateway_integration.proxy,
     aws_api_gateway_integration.root,
     aws_api_gateway_integration.health,
   ]
@@ -382,7 +411,7 @@ resource "aws_acm_certificate_validation" "api" {
 resource "aws_api_gateway_domain_name" "api" {
   domain_name              = "api.${var.domain_name}"
   regional_certificate_arn = aws_acm_certificate_validation.api.certificate_arn
-  security_policy          = "TLS_1_3"
+  security_policy          = "TLS_1_2"
 
   endpoint_configuration {
     types = ["REGIONAL"]
