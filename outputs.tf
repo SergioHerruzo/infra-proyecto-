@@ -36,6 +36,11 @@ output "api_gateway_url" {
   value       = "https://${aws_api_gateway_rest_api.main.id}.execute-api.${var.aws_region}.amazonaws.com/${aws_api_gateway_stage.prod.stage_name}"
 }
 
+output "api_gateway_custom_domain_url" {
+  description = "URL del dominio personalizado del API Gateway con TLS 1.3"
+  value       = "https://api.${var.domain_name}"
+}
+
 output "api_gateway_id" {
   description = "ID del API Gateway REST"
   value       = aws_api_gateway_rest_api.main.id
@@ -71,12 +76,12 @@ output "private_subnet_ids" {
 # -------------------------------------------------------
 
 output "backend_ec2_public_ip" {
-  description = "IP publica de la instancia EC2 del backend"
+  description = "IP publica de la instancia EC2 de workers"
   value       = aws_instance.backend.public_ip
 }
 
 output "backend_ec2_public_dns" {
-  description = "DNS publico de la instancia EC2 del backend"
+  description = "DNS publico de la instancia EC2 de workers"
   value       = aws_instance.backend.public_dns
 }
 

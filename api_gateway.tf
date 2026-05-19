@@ -60,9 +60,9 @@ resource "aws_api_gateway_integration" "root" {
   rest_api_id             = aws_api_gateway_rest_api.main.id
   resource_id             = aws_api_gateway_rest_api.main.root_resource_id
   http_method             = aws_api_gateway_method.root_any.http_method
-  type                    = "HTTP_PROXY"
-  integration_http_method = "ANY"
-  uri                     = "http://${aws_instance.backend.public_dns}/"
+  type                    = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri                     = aws_lambda_function.main.invoke_arn
 }
 
 # Integración para /health
@@ -70,9 +70,9 @@ resource "aws_api_gateway_integration" "health" {
   rest_api_id             = aws_api_gateway_rest_api.main.id
   resource_id             = aws_api_gateway_resource.health.id
   http_method             = aws_api_gateway_method.health_get.http_method
-  type                    = "HTTP_PROXY"
-  integration_http_method = "GET"
-  uri                     = "http://${aws_instance.backend.public_dns}/health"
+  type                    = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri                     = aws_lambda_function.main.invoke_arn
 }
 
 # -------------------------------------------------------
@@ -334,5 +334,82 @@ resource "aws_cloudwatch_log_group" "api_gw_exec" {
 
   tags = {
     Name = "steam-api-exec-logs"
+  }
+}
+
+# -------------------------------------------------------
+# Custom Domain + TLS Security Policy
+# -------------------------------------------------------
+
+# Certificado ACM para api.<dominio> (validación DNS con Route53)
+resource "aws_acm_certificate" "api" {
+  domain_name       = "api.${var.domain_name}"
+  validation_method = "DNS"
+
+  tags = {
+    Name    = "steam-api-cert"
+    Project = "steam-indio"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Registro Route53 para validar el certificado
+resource "aws_route53_record" "api_cert_validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.api.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      type   = dvo.resource_record_type
+      record = dvo.resource_record_value
+    }
+  }
+
+  zone_id = aws_route53_zone.main.zone_id
+  name    = each.value.name
+  type    = each.value.type
+  records = [each.value.record]
+  ttl     = 60
+}
+
+resource "aws_acm_certificate_validation" "api" {
+  certificate_arn         = aws_acm_certificate.api.arn
+  validation_record_fqdns = [for r in aws_route53_record.api_cert_validation : r.fqdn]
+}
+
+# Dominio personalizado de API Gateway con política TLS 1.3
+resource "aws_api_gateway_domain_name" "api" {
+  domain_name              = "api.${var.domain_name}"
+  regional_certificate_arn = aws_acm_certificate_validation.api.certificate_arn
+  security_policy          = "TLS_1_3"
+
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+
+  tags = {
+    Name    = "steam-api-domain"
+    Project = "steam-indio"
+  }
+}
+
+# Mapeo del dominio personalizado al stage prod
+resource "aws_api_gateway_base_path_mapping" "api" {
+  api_id      = aws_api_gateway_rest_api.main.id
+  stage_name  = aws_api_gateway_stage.prod.stage_name
+  domain_name = aws_api_gateway_domain_name.api.domain_name
+}
+
+# Registro Route53 apuntando al dominio de API Gateway
+resource "aws_route53_record" "api_domain" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "api.${var.domain_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_api_gateway_domain_name.api.regional_domain_name
+    zone_id                = aws_api_gateway_domain_name.api.regional_zone_id
+    evaluate_target_health = false
   }
 }
