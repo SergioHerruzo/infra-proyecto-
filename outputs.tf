@@ -36,10 +36,6 @@ output "api_gateway_url" {
   value       = "https://${aws_api_gateway_rest_api.main.id}.execute-api.${var.aws_region}.amazonaws.com/${aws_api_gateway_stage.prod.stage_name}"
 }
 
-output "api_gateway_custom_domain_url" {
-  description = "URL del dominio personalizado del API Gateway con TLS 1.3"
-  value       = "https://api.${var.domain_name}"
-}
 
 output "api_gateway_id" {
   description = "ID del API Gateway REST"
