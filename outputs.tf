@@ -116,11 +116,11 @@ output "lambda_function_arn" {
 
 output "amplify_app_url_prod" {
   description = "URL de producción (rama main)"
-  value       = "https://www.${var.domain_name}"
+  value       = "https://${var.github_branch}.${aws_amplify_app.prod.default_domain}"
 }
 
 output "amplify_app_url_dev" {
   description = "URL de desarrollo (rama develop)"
-  value       = "https://dev.${var.domain_name}"
+  value       = "https://${var.github_branch_dev}.${aws_amplify_app.dev.default_domain}"
 }
 

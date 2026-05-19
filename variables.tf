@@ -44,9 +44,6 @@ variable "github_branch_dev" {
 # Networking / DNS
 # -------------------------------------------------------
 
-variable "domain_name" {
-  description = "Nombre de dominio público para la aplicación (ej: steamindio.com)"
-}
 # -------------------------------------------------------
 # Bastion / Access
 # -------------------------------------------------------
