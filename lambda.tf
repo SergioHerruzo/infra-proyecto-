@@ -47,7 +47,7 @@ resource "aws_lambda_function" "main" {
       Authentication__TokenEndpoint         = "https://${aws_cognito_user_pool_domain.main.domain}.auth.${var.aws_region}.amazoncognito.com/oauth2/token"
 
       # Database
-      Database__ConnectionString = "Host=${aws_db_instance.postgres.address};Port=5432;Database=${aws_db_instance.postgres.db_name};Username=admin;Password=Pirineus12!;SSL Mode=VerifyFull;Root Certificate=./global-bundle.pem"
+      Database__ConnectionString = "Host=${aws_db_instance.postgres.address};Port=5432;Database=${aws_db_instance.postgres.db_name};Username=${aws_db_instance.postgres.username};Password=Pirineus12!;SSL Mode=VerifyFull;Root Certificate=./global-bundle.pem"
 
       # S3
       S3__Region       = var.aws_region
@@ -57,7 +57,7 @@ resource "aws_lambda_function" "main" {
       S3__SessionToken = var.academy_aws_session_token
 
       # Messaging (SQS)
-      Messaging__Address      = var.aws_region
+      Messaging__Address      = aws_sqs_queue.main.url
       Messaging__AccessKey    = var.academy_aws_access_key
       Messaging__SecretKey    = var.academy_aws_secret_key
       Messaging__SessionToken = var.academy_aws_session_token
