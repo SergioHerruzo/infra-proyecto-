@@ -46,8 +46,15 @@ resource "aws_api_gateway_request_validator" "main" {
 }
 
 # -------------------------------------------------------
-# Resources - /health (público) y /{proxy+} (protegido)
+# Resources - /health (público), raíz (/) y /{proxy+} (protegido)
 # -------------------------------------------------------
+
+# /health
+resource "aws_api_gateway_resource" "health" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_rest_api.main.root_resource_id
+  path_part   = "health"
+}
 
 # /{proxy+}
 resource "aws_api_gateway_resource" "proxy" {
@@ -56,10 +63,24 @@ resource "aws_api_gateway_resource" "proxy" {
   path_part   = "{proxy+}"
 }
 
-
 # -------------------------------------------------------
 # Methods
 # -------------------------------------------------------
+
+# ANY / (Raíz) — requiere token Cognito
+resource "aws_api_gateway_method" "root_any" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id   = aws_api_gateway_rest_api.main.root_resource_id
+  http_method   = "ANY"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
+
+  request_validator_id = aws_api_gateway_request_validator.main.id
+
+  request_parameters = {
+    "method.request.header.Authorization" = true
+  }
+}
 
 # ANY /{proxy+} — requiere token Cognito
 resource "aws_api_gateway_method" "proxy_any" {
@@ -77,10 +98,29 @@ resource "aws_api_gateway_method" "proxy_any" {
   }
 }
 
+# GET /health — PÚBLICO (Sin autorización)
+resource "aws_api_gateway_method" "health_get" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id   = aws_api_gateway_resource.health.id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+
 # -------------------------------------------------------
 # Integrations
 # -------------------------------------------------------
 
+# Integración para la raíz /
+resource "aws_api_gateway_integration" "root" {
+  rest_api_id             = aws_api_gateway_rest_api.main.id
+  resource_id             = aws_api_gateway_rest_api.main.root_resource_id
+  http_method             = aws_api_gateway_method.root_any.http_method
+  type                    = "HTTP_PROXY"
+  integration_http_method = "ANY"
+  uri                     = "http://${aws_instance.backend.public_dns}/"
+}
+
+# Integración para /{proxy+}
 resource "aws_api_gateway_integration" "proxy" {
   rest_api_id             = aws_api_gateway_rest_api.main.id
   resource_id             = aws_api_gateway_resource.proxy.id
@@ -96,6 +136,16 @@ resource "aws_api_gateway_integration" "proxy" {
   }
 }
 
+# Integración para /health
+resource "aws_api_gateway_integration" "health" {
+  rest_api_id             = aws_api_gateway_rest_api.main.id
+  resource_id             = aws_api_gateway_resource.health.id
+  http_method             = aws_api_gateway_method.health_get.http_method
+  type                    = "HTTP_PROXY"
+  integration_http_method = "GET"
+  uri                     = "http://${aws_instance.backend.public_dns}/health"
+}
+
 # -------------------------------------------------------
 # Deployment & Stage
 # -------------------------------------------------------
@@ -109,6 +159,11 @@ resource "aws_api_gateway_deployment" "main" {
       aws_api_gateway_resource.proxy.id,
       aws_api_gateway_method.proxy_any.id,
       aws_api_gateway_integration.proxy.id,
+      aws_api_gateway_method.root_any.id,
+      aws_api_gateway_integration.root.id,
+      aws_api_gateway_resource.health.id,
+      aws_api_gateway_method.health_get.id,
+      aws_api_gateway_integration.health.id,
     ]))
   }
 
@@ -118,6 +173,8 @@ resource "aws_api_gateway_deployment" "main" {
 
   depends_on = [
     aws_api_gateway_integration.proxy,
+    aws_api_gateway_integration.root,
+    aws_api_gateway_integration.health,
   ]
 }
 
