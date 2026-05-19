@@ -5,8 +5,8 @@
 resource "aws_cognito_user_pool" "main" {
   name = "steam-user-pool"
 
-  # Allow users to sign in with their email address
-  username_attributes = ["email"]
+  # Users sign in with their username or preferred_username (nombre)
+  alias_attributes = ["preferred_username"]
 
   # Automatically verify email on sign-up
   auto_verified_attributes = ["email"]
@@ -21,7 +21,6 @@ resource "aws_cognito_user_pool" "main" {
     temporary_password_validity_days = 7
   }
 
-  # Standard email attribute (required for login)
   schema {
     attribute_data_type = "String"
     name                = "email"
@@ -31,6 +30,32 @@ resource "aws_cognito_user_pool" "main" {
     string_attribute_constraints {
       min_length = 5
       max_length = 254
+    }
+  }
+
+  # Name required at registration
+  schema {
+    attribute_data_type = "String"
+    name                = "name"
+    required            = true
+    mutable             = true
+
+    string_attribute_constraints {
+      min_length = 1
+      max_length = 100
+    }
+  }
+
+  # preferred_username allows login with a chosen name (alias)
+  schema {
+    attribute_data_type = "String"
+    name                = "preferred_username"
+    required            = true
+    mutable             = true
+
+    string_attribute_constraints {
+      min_length = 1
+      max_length = 50
     }
   }
 
