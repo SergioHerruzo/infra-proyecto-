@@ -100,17 +100,6 @@ resource "aws_security_group" "lambda_sg" {
   }
 }
 
-# Regla en db_sg: permite que la Lambda acceda a RDS
-resource "aws_security_group_rule" "db_from_lambda" {
-  type                     = "ingress"
-  from_port                = 5432
-  to_port                  = 5432
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.db_sg.id
-  source_security_group_id = aws_security_group.lambda_sg.id
-  description              = "PostgreSQL desde Lambda"
-}
-
 # Permiso para que API Gateway invoque la Lambda
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowAPIGatewayInvoke"
