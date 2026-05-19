@@ -32,6 +32,15 @@ resource "aws_security_group" "bastion_sg" {
     cidr_blocks = [var.my_ip_cidr]
   }
 
+  # EC2 Instance Connect (us-east-1) — necesario para SSH desde la consola de AWS
+  ingress {
+    description = "EC2 Instance Connect service IPs (us-east-1)"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["18.206.107.24/29"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
