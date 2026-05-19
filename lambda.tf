@@ -16,6 +16,7 @@ resource "aws_lambda_function" "main" {
   handler          = "lambda_function.handler"
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
   runtime          = "python3.11"
+  timeout          = 600
 
   # Configuración de red (VPC)
   vpc_config {

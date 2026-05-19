@@ -67,17 +67,17 @@ variable "bastion_key_name" {
 
 variable "stripe_secret_key" {
   description = "Stripe Secret Key"
-  default     = ""
+  sensitive   = true
 }
 
 variable "stripe_webhook_secret" {
   description = "Stripe Webhook Secret"
-  default     = ""
+  sensitive   = true
 }
 
 variable "stripe_publishable_key" {
   description = "Stripe Publishable Key"
-  default     = ""
+  sensitive   = true
 }
 
 variable "stripe_currency" {
@@ -91,15 +91,15 @@ variable "stripe_currency" {
 
 variable "academy_aws_access_key" {
   description = "AWS Academy Access Key"
-  default     = ""
+  sensitive   = true
 }
 
 variable "academy_aws_secret_key" {
   description = "AWS Academy Secret Key"
-  default     = ""
+  sensitive   = true
 }
 
 variable "academy_aws_session_token" {
   description = "AWS Academy Session Token"
-  default     = ""
+  sensitive   = true
 }
