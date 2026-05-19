@@ -36,8 +36,7 @@ resource "aws_lambda_function" "main" {
 
   environment {
     variables = {
-      ENV          = "production"
-      DATABASE_URL = "postgresql://admin:Pirineus12!@${aws_db_instance.postgres.endpoint}/postgres"
+      ENV = "production"
 
       # Authentication
       Authentication__Region                = var.aws_region
@@ -99,6 +98,17 @@ resource "aws_security_group" "lambda_sg" {
   tags = {
     Name    = "steam-lambda-sg"
   }
+}
+
+# Regla en db_sg: permite que la Lambda acceda a RDS
+resource "aws_security_group_rule" "db_from_lambda" {
+  type                     = "ingress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.db_sg.id
+  source_security_group_id = aws_security_group.lambda_sg.id
+  description              = "PostgreSQL desde Lambda"
 }
 
 # Permiso para que API Gateway invoque la Lambda
