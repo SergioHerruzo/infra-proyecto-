@@ -5,7 +5,7 @@
 resource "aws_cognito_user_pool" "main" {
   name = "steam-user-pool"
 
-  alias_attributes         = ["preferred_username"]
+  username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
 
   password_policy {
@@ -38,18 +38,6 @@ resource "aws_cognito_user_pool" "main" {
     string_attribute_constraints {
       min_length = 1
       max_length = 100
-    }
-  }
-
-  schema {
-    attribute_data_type = "String"
-    name                = "preferred_username"
-    required            = true
-    mutable             = true
-
-    string_attribute_constraints {
-      min_length = 1
-      max_length = 50
     }
   }
 
