@@ -44,6 +44,12 @@ variable "github_branch_dev" {
 # Networking / DNS
 # -------------------------------------------------------
 
+variable "frontend_callback_url" {
+  description = "URL base del frontend para callbacks de Cognito (ej: https://main.xxxx.amplifyapp.com)"
+  default     = "http://localhost:3000"
+}
+
+
 # -------------------------------------------------------
 # Bastion / Access
 # -------------------------------------------------------
