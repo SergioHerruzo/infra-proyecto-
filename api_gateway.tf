@@ -21,32 +21,7 @@ resource "aws_api_gateway_rest_api" "main" {
 }
 
 # -------------------------------------------------------
-# Cognito Authorizer
-# -------------------------------------------------------
-
-resource "aws_api_gateway_authorizer" "cognito" {
-  name          = "cognito-authorizer"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  type          = "COGNITO_USER_POOLS"
-  provider_arns = [aws_cognito_user_pool.main.arn]
-
-  # Token enviado en la cabecera Authorization
-  identity_source = "method.request.header.Authorization"
-}
-
-# -------------------------------------------------------
-# Request Validator (valida headers y query params)
-# -------------------------------------------------------
-
-resource "aws_api_gateway_request_validator" "main" {
-  name                        = "validate-request"
-  rest_api_id                 = aws_api_gateway_rest_api.main.id
-  validate_request_body       = true
-  validate_request_parameters = true
-}
-
-# -------------------------------------------------------
-# Resources - /health (público), raíz (/) y /{proxy+} (protegido)
+# Resources - /health (público) y raíz (/)
 # -------------------------------------------------------
 
 # /health
@@ -56,49 +31,19 @@ resource "aws_api_gateway_resource" "health" {
   path_part   = "health"
 }
 
-# /{proxy+}
-resource "aws_api_gateway_resource" "proxy" {
-  rest_api_id = aws_api_gateway_rest_api.main.id
-  parent_id   = aws_api_gateway_rest_api.main.root_resource_id
-  path_part   = "{proxy+}"
-}
-
 # -------------------------------------------------------
 # Methods
 # -------------------------------------------------------
 
-# ANY / (Raíz) — requiere token Cognito
+# ANY / (Raíz) — sin autorización
 resource "aws_api_gateway_method" "root_any" {
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_rest_api.main.root_resource_id
   http_method   = "ANY"
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-
-  request_validator_id = aws_api_gateway_request_validator.main.id
-
-  request_parameters = {
-    "method.request.header.Authorization" = true
-  }
+  authorization = "NONE"
 }
 
-# ANY /{proxy+} — requiere token Cognito
-resource "aws_api_gateway_method" "proxy_any" {
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  resource_id   = aws_api_gateway_resource.proxy.id
-  http_method   = "ANY"
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-
-  request_validator_id = aws_api_gateway_request_validator.main.id
-
-  request_parameters = {
-    "method.request.header.Authorization" = true
-    "method.request.path.proxy"           = true
-  }
-}
-
-# GET /health — PÚBLICO (Sin autorización)
+# GET /health — sin autorización
 resource "aws_api_gateway_method" "health_get" {
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_resource.health.id
@@ -118,22 +63,6 @@ resource "aws_api_gateway_integration" "root" {
   type                    = "HTTP_PROXY"
   integration_http_method = "ANY"
   uri                     = "http://${aws_instance.backend.public_dns}/"
-}
-
-# Integración para /{proxy+}
-resource "aws_api_gateway_integration" "proxy" {
-  rest_api_id             = aws_api_gateway_rest_api.main.id
-  resource_id             = aws_api_gateway_resource.proxy.id
-  http_method             = aws_api_gateway_method.proxy_any.http_method
-  type                    = "HTTP_PROXY"
-  integration_http_method = "ANY"
-  uri                     = "http://${aws_instance.backend.public_dns}/{proxy}"
-
-  cache_key_parameters = ["method.request.path.proxy"]
-
-  request_parameters = {
-    "integration.request.path.proxy" = "method.request.path.proxy"
-  }
 }
 
 # Integración para /health
@@ -156,9 +85,6 @@ resource "aws_api_gateway_deployment" "main" {
   # Fuerza re-deploy al cambiar recursos o métodos
   triggers = {
     redeployment = sha1(jsonencode([
-      aws_api_gateway_resource.proxy.id,
-      aws_api_gateway_method.proxy_any.id,
-      aws_api_gateway_integration.proxy.id,
       aws_api_gateway_method.root_any.id,
       aws_api_gateway_integration.root.id,
       aws_api_gateway_resource.health.id,
@@ -172,7 +98,6 @@ resource "aws_api_gateway_deployment" "main" {
   }
 
   depends_on = [
-    aws_api_gateway_integration.proxy,
     aws_api_gateway_integration.root,
     aws_api_gateway_integration.health,
   ]
